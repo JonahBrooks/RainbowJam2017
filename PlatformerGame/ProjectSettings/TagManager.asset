@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Updraft
+  - Elevator
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Ground
+  - Grabbable
+  - Slammable
+  - OuterWall
+  - NPC
+  - Player
+  - CommandTriggers
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Background Far (Back)
+    uniqueID: 2890941725
+    locked: 0
+  - name: Background Medium (Back)
+    uniqueID: 2408059471
+    locked: 0
+  - name: Background Near (Back)
+    uniqueID: 4043682619
+    locked: 0
+  - name: Background Far
+    uniqueID: 2528194313
+    locked: 0
+  - name: Background Medium
+    uniqueID: 360282841
+    locked: 0
+  - name: Background Near
+    uniqueID: 3483849923
+    locked: 0
+  - name: Foreground
+    uniqueID: 4008343263
+    locked: 0
+  - name: NPCs
+    uniqueID: 3401829521
+    locked: 0
+  - name: Player
+    uniqueID: 1815497565
+    locked: 0
+  - name: Behind Kenno
+    uniqueID: 3976775701
+    locked: 0
+  - name: Kenno's Back
+    uniqueID: 1577302165
+    locked: 0
+  - name: Inner Floaties
+    uniqueID: 41193259
+    locked: 0
+  - name: Kenno's Cape
+    uniqueID: 1943051705
+    locked: 0
+  - name: In Front of Kenno
+    uniqueID: 2318480825
+    locked: 0

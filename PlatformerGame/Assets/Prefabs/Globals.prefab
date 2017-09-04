@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1803812621587200}
+  m_IsPrefabParent: 1
+--- !u!1 &1803812621587200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4063038037607540}
+  - component: {fileID: 114149503721495228}
+  m_Layer: 0
+  m_Name: Globals
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4063038037607540
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1803812621587200}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114149503721495228
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1803812621587200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 255d386f45601d44480e10ce8b25bd22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSpeed: 5
+  maxGlideSpeed: 10
+  moveForce: 50
+  glideForce: 40
+  jumpForce: 450
+  doubleJumpForce: 500
+  slamForce: 1000
+  slamDelay: 0.2
+  stunDelay: 0.5
+  hangtimeDelay: 0.2
+  hangtimeThreshold: 0.3
+  glideGravity: 0.2
+  normalGravity: 1.5
+  updraftForce: 1.3
+  stoppingFactor: 1
+  grabbableObjectGap: 0.1
+  soundEffects: {fileID: 0}
+  jumpSoundEffects:
+  - {fileID: 8300000, guid: 7a58749978e715f45b66c025b4323133, type: 3}
+  - {fileID: 8300000, guid: 533173d1431004f4f8165c396e3b99c4, type: 3}
+  - {fileID: 8300000, guid: 69843748fc77d30448e110d779060834, type: 3}
+  - {fileID: 8300000, guid: 4953e716ee68f554bb1904ffca15e755, type: 3}
+  crashSoundEffect: {fileID: 8300000, guid: a67ad72e4f12dd04ca45c92fe77d29ff, type: 3}
+  descendSoundEffect: {fileID: 8300000, guid: 3040f0a0f70f3164e90183019e02bfbd, type: 3}
+  glideSoundEffect: {fileID: 8300000, guid: 8e5598f8509441943acf0a0a828e6de2, type: 3}
