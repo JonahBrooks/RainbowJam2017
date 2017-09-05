@@ -28,5 +28,7 @@ public class PlayerCharacter : Character {
 		commands.btnDownGrab = Input.GetButtonDown("Grab");
 		commands.btnGrab = Input.GetButton("Grab");
 		commands.btnUpGrab = Input.GetButtonUp("Grab");
+
+        commands.btnDownEsc = Input.GetKeyDown(KeyCode.Escape);
 	}
 }

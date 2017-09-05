@@ -33,18 +33,22 @@ public class Globals : MonoBehaviour {
     public float updraftForce;
     [Tooltip("The factor by which horizontal velocity is adjusted when stopping. 1 is friction only, 0 is full immediate stop")]
     public float stoppingFactor;
-    [Tooltip("The distance to move a grabbable object if it is too close to push.")]
-    public float grabbableObjectGap;
+    [Tooltip("The time in seconds between entering the portal and the title screen laoding.")]
+    public float endGameDelay;
     [Tooltip("The audio source used for playing sound effects.")]
     public AudioSource soundEffects;
     [Tooltip("The various jump sound effects.")]
     public AudioClip[] jumpSoundEffects;
+    [Tooltip("The various grab sound effects.")]
+    public AudioClip[] grabSoundEffects;
     [Tooltip("The slam crash sound effect.")]
     public AudioClip crashSoundEffect;
     [Tooltip("The jump descending sound effect.")]
     public AudioClip descendSoundEffect;
     [Tooltip("The glide sound effect (loops)")]
     public AudioClip glideSoundEffect;
+    [Tooltip("Canvas holding the pause menu.")]
+    public Canvas pauseMenu;
 
     [Tooltip("Sprite for the arrow (blue) speech bubble.")]
     public Sprite blueSpeechBubble;

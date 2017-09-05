@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Updraft
   - Elevator
+  - EndGame
   layers:
   - Default
   - TransparentFX

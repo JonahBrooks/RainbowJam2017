@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 /*
@@ -38,6 +39,8 @@ public class PlayerController : MonoBehaviour {
     public float maxSpeed;
     [Tooltip("The maximum speed the player can move while gliding.")]
     public float maxGlideSpeed;
+    [Tooltip("The maximum vertical speed the player can move while floating in an updraft.")]
+    public float maxUpdraftSpeed;
     [Tooltip("The sideways force applied to the character when a or d is pressed.")]
     public float moveForce;
     [Tooltip("THe sideways force applied to the character when gliding and a or d is pressed.")]
@@ -64,8 +67,8 @@ public class PlayerController : MonoBehaviour {
     public float updraftForce;
     [Tooltip("The factor by which horizontal velocity is adjusted when stopping. 1 is friction only, 0 is full immediate stop")]
     public float stoppingFactor;
-    [Tooltip("The distance to move a grabbable object if it is too close to push.")]
-    public float grabbableObjectGap;
+    [Tooltip("The time in seconds between entering the portal and the title screen laoding.")]
+    public float endGameDelay;
     [Tooltip("Used in determining if the player is on the ground.")]
     public BoxCollider2D groundCheck;
     [Tooltip("Used in determining if the player can grab an object in front of them.")]
@@ -82,6 +85,8 @@ public class PlayerController : MonoBehaviour {
     public AudioClip descendSoundEffect;
     [Tooltip("The glide sound effect (loops)")]
     public AudioClip glideSoundEffect;
+    [Tooltip("Canvas holding the pause menu.")]
+    public Canvas pauseMenu;
    
 
     private Rigidbody2D rb2d;
@@ -109,6 +114,7 @@ public class PlayerController : MonoBehaviour {
     private bool hasGlideAbility;
     private bool hasGrabAbility;
     private bool hasSingleWallJumpAbility;
+    private bool isPaused;
     private Vector2 groundCheckTopLeft;
     private Vector2 groundCheckBottomRight;
     private Transform grabbedObject;
@@ -143,9 +149,11 @@ public class PlayerController : MonoBehaviour {
         hasGlideAbility = true; // TODO: Change this to false when we have NPCs implemented
         hasGrabAbility = true; // TODO: Change this to false when we have NPCs implemented
         hasSingleWallJumpAbility = false; // This probably remains false forever. Just leaving it in as a quick toggle.
+        isPaused = false;
         rb2d.gravityScale = normalGravity;
 
         globals = GameObject.Find("Globals").GetComponent<Globals>();
+        pauseMenu.enabled = false;
     }
 
 
@@ -158,6 +166,10 @@ public class PlayerController : MonoBehaviour {
         if( collision.CompareTag("Updraft") && collision.GetComponent<UpdraftController>().isActive)
         {
             isInUpdraft = true;
+        }
+        if(collision.CompareTag("EndGame"))
+        {
+            StartCoroutine(EndGameCoroutine());
         }
     }
 
@@ -175,7 +187,11 @@ public class PlayerController : MonoBehaviour {
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-
+        // In OnTriggerStay so that overlapping colliders don't render them unusable
+        if (collision.CompareTag("Updraft") && collision.GetComponent<UpdraftController>().isActive)
+        {
+            isInUpdraft = true;
+        }
     }
 
     private void FixedUpdate()
@@ -209,6 +225,14 @@ public class PlayerController : MonoBehaviour {
             // Clamp x velocity to max glide speed
             rb2d.velocity = new Vector2(Mathf.Sign(rb2d.velocity.x) * maxGlideSpeed, rb2d.velocity.y);
         }
+
+        // If the player is going over max updraft speed
+        if (isInUpdraft && isGliding && Mathf.Abs(rb2d.velocity.y) > maxUpdraftSpeed)
+        {
+            // Clamp y velocity to max vertical speed
+            rb2d.velocity = new Vector2(rb2d.velocity.x, Mathf.Sign(rb2d.velocity.y) * maxUpdraftSpeed);
+        }
+        
 
         // If the player is not trying to move, reduce moving speed
         if (!isStopping && !Input.GetButton("Right") && !Input.GetButton("Left") && !Input.GetButton("Dash"))
@@ -357,6 +381,14 @@ public class PlayerController : MonoBehaviour {
         isGrounded = isGrounded || Physics2D.OverlapArea(groundCheckTopLeft, groundCheckBottomRight, 1 << LayerMask.NameToLayer("Grabbable"));
         // Or a slammable object
         isGrounded = isGrounded || Physics2D.OverlapArea(groundCheckTopLeft, groundCheckBottomRight, 1 << LayerMask.NameToLayer("Slammable"));
+
+        // PAUSING
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            PauseOrUnpauseGame();
+
+        }
+
 
         // JUMPING
         
@@ -570,6 +602,27 @@ public class PlayerController : MonoBehaviour {
         particlesModule.startColor = newColor;
     }
 
+    public void PauseOrUnpauseGame()
+    {
+        
+        isPaused = !isPaused;
+        if(isPaused)
+        {
+            Time.timeScale = 0;
+            pauseMenu.enabled = true;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            pauseMenu.enabled = false;
+        }
+        
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 
     // Start slam after delay of slamDelay seconds
     IEnumerator SlamCoroutine()
@@ -606,6 +659,13 @@ public class PlayerController : MonoBehaviour {
         rb2d.gravityScale = 0;
         yield return new WaitForSeconds(hangtimeDelay);
         rb2d.gravityScale = normalGravity;
+    }
+
+    IEnumerator EndGameCoroutine()
+    {
+        yield return new WaitForSeconds(endGameDelay);
+        SceneManager.LoadScene("Title");
+
     }
 
  }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 /*
@@ -58,6 +59,8 @@ public abstract class Character : MonoBehaviour {
 		public bool btnDownGrab;
 		public bool btnGrab;
 		public bool btnUpGrab;
+
+        public bool btnDownEsc;
 
         // Don't call this! It should be called once in Character.FixedUpdate.
         // Potential problem: because some variables were originally accessed in FixedUpdate
@@ -134,6 +137,7 @@ public abstract class Character : MonoBehaviour {
     protected bool hasGlideAbility;
     protected bool hasGrabAbility;
     protected bool hasSingleWallJumpAbility;
+    protected bool isPaused;
     protected Vector2 groundCheckTopLeft;
     protected Vector2 groundCheckBottomRight;
     protected Transform grabbedObject;
@@ -196,7 +200,10 @@ public abstract class Character : MonoBehaviour {
         hasGlideAbility = true; // TODO: Change this to false when we have NPCs implemented
         hasGrabAbility = true; // TODO: Change this to false when we have NPCs implemented
         hasSingleWallJumpAbility = false; // This probably remains false forever. Just leaving it in as a quick toggle.
+        isPaused = false;
         rb2d.gravityScale = globals.normalGravity;
+
+        globals.pauseMenu.enabled = false;
     }
 
 	protected void Update() {
@@ -204,9 +211,10 @@ public abstract class Character : MonoBehaviour {
 
 		UpdateCommands();
 		UpdateMovement();
+        commands.rollOverOk = true;
 
-        
-	}
+
+    }
 
 
     protected void OnTriggerEnter2D(Collider2D collision)
@@ -218,6 +226,10 @@ public abstract class Character : MonoBehaviour {
         if (collision.CompareTag("Updraft") && collision.GetComponent<UpdraftController>().isActive)
         {
             isInUpdraft = true;
+        }
+        if (collision.CompareTag("EndGame"))
+        {
+            StartCoroutine(EndGameCoroutine());
         }
     }
 
@@ -233,9 +245,13 @@ public abstract class Character : MonoBehaviour {
         }
     }
 
-    protected void OnTriggerStay2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        
+        // In OnTriggerStay so that overlapping colliders don't render them unusable
+        if (collision.CompareTag("Updraft") && collision.GetComponent<UpdraftController>().isActive)
+        {
+            isInUpdraft = true;
+        }
     }
 
     protected void FixedUpdate()
@@ -407,7 +423,6 @@ public abstract class Character : MonoBehaviour {
             }
         }
 
-        commands.rollOverOk = true;
     }
     
     protected void UpdateMovement () {
@@ -615,9 +630,40 @@ public abstract class Character : MonoBehaviour {
             grabbedObject.GetComponentInParent<FixedJoint2D>().connectedBody = rb2d;
             // Store the direction from the player the grabbed object is on
             grabbedObjectIsOnRight = isFacingRight;
+
+            if (playSoundEffects)
+            {
+                // Load sound effect at random
+                var sfxIndex = Random.Range(0, globals.grabSoundEffects.Length);
+                globals.soundEffects.clip = globals.grabSoundEffects[sfxIndex];
+                // Make sure looping is turned off
+                globals.soundEffects.loop = false;
+                // Play sound effect
+                globals.soundEffects.Play();
+            }
         }
     }
 
+
+    public void PauseOrUnpauseGame()
+    {
+        isPaused = !isPaused;
+        if (isPaused)
+        {
+            Time.timeScale = 0;
+            globals.pauseMenu.enabled = true;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            globals.pauseMenu.enabled = false;
+        }
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 
     // Start slam after delay of slamDelay seconds
     IEnumerator SlamCoroutine()
@@ -656,4 +702,10 @@ public abstract class Character : MonoBehaviour {
         rb2d.gravityScale = globals.normalGravity;
     }
 
- }
+    IEnumerator EndGameCoroutine()
+    {
+        yield return new WaitForSeconds(globals.endGameDelay);
+        SceneManager.LoadScene("Title");
+
+    }
+}

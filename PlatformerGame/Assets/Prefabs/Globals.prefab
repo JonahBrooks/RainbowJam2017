@@ -73,6 +73,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 533173d1431004f4f8165c396e3b99c4, type: 3}
   - {fileID: 8300000, guid: 69843748fc77d30448e110d779060834, type: 3}
   - {fileID: 8300000, guid: 4953e716ee68f554bb1904ffca15e755, type: 3}
+  grabSoundEffects:
+  - {fileID: 8300000, guid: f16750b802fa53d4cbff2401d77c607a, type: 3}
+  - {fileID: 8300000, guid: 38ec3bb294c46034f9b36e5eba19b155, type: 3}
   crashSoundEffect: {fileID: 8300000, guid: a67ad72e4f12dd04ca45c92fe77d29ff, type: 3}
   descendSoundEffect: {fileID: 8300000, guid: 3040f0a0f70f3164e90183019e02bfbd, type: 3}
   glideSoundEffect: {fileID: 8300000, guid: 8e5598f8509441943acf0a0a828e6de2, type: 3}
+  blueSpeechBubble: {fileID: 0}
+  glideColor: {r: 0, g: 0, b: 0, a: 0}
+  slamColor: {r: 0, g: 0, b: 0, a: 0}
+  grabColor: {r: 0, g: 0, b: 0, a: 0}
