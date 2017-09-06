@@ -114,7 +114,6 @@ public class CommandTrigger : MonoBehaviour {
 		var curCommand = commandList[curCommandIndex];
 		var curStatus = commandStatusList[curCommandIndex];
 
-        Debug.Log("Command fired: " + curCommand.type);
 		// Set NPC target based on triggerMode. Some command types won't use this.
 		GameObject npcObject = null;
 		switch (curCommand.triggerMode) {

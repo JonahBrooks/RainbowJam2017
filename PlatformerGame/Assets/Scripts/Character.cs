@@ -40,7 +40,6 @@ public abstract class Character : MonoBehaviour {
 	// to fill this struct every frame. (The player subclass will check Input; NPC subclass(es) will
 	// get commands elsewhere.)
 	public class CommandState {
-        public bool rollOverOk;
 
 		public float horizontal;
 		public bool btnLeft;
@@ -62,13 +61,7 @@ public abstract class Character : MonoBehaviour {
 
         public bool btnDownEsc;
 
-        // Don't call this! It should be called once in Character.FixedUpdate.
-        // Potential problem: because some variables were originally accessed in FixedUpdate
-        // and some in Update, there is a chance either function would have seen the same
-        // set of data twice, and that code has not been adjusted to take that into consideration.
         public void FrameRollOver() {
-            if (!rollOverOk)
-                return;
 
             if (btnDownJump) {
                 btnDownJump = false;
@@ -126,7 +119,6 @@ public abstract class Character : MonoBehaviour {
     protected bool isSlamming;
     protected bool canSlam;
     protected bool hasSlamAbilitiy;
-    protected bool isStartingJump;
     protected bool isGrabbing;
     protected bool isGliding;
     protected bool isInUpdraft;
@@ -189,7 +181,7 @@ public abstract class Character : MonoBehaviour {
         isStartingSlam = false;
         isSlamming = false;
         canSlam = true;
-        isStartingJump = false;
+        //isStartingJump = false;
         isGrabbing = false;
         isGliding = false;
         canGlide = true;
@@ -207,13 +199,11 @@ public abstract class Character : MonoBehaviour {
     }
 
 	protected void Update() {
-        commands.FrameRollOver();
+        
 
 		UpdateCommands();
 		UpdateMovement();
-        commands.rollOverOk = true;
-
-
+        commands.FrameRollOver();
     }
 
 
@@ -285,6 +275,14 @@ public abstract class Character : MonoBehaviour {
             rb2d.velocity = new Vector2(Mathf.Sign(rb2d.velocity.x) * globals.maxGlideSpeed, rb2d.velocity.y);
         }
 
+        // If the player is going over max updraft speed
+        if (isInUpdraft && isGliding && Mathf.Abs(rb2d.velocity.y) > globals.maxUpdraftSpeed)
+        {
+            // Clamp y velocity to max vertical speed
+            rb2d.velocity = new Vector2(rb2d.velocity.x, Mathf.Sign(rb2d.velocity.y) * globals.maxUpdraftSpeed);
+        }
+
+
         // If the player is not trying to move, reduce moving speed
         if (!isStopping && !commands.btnRight && !commands.btnLeft && !commands.btnDash)
         {				   
@@ -309,82 +307,6 @@ public abstract class Character : MonoBehaviour {
         if(isInUpdraft)
         {
             rb2d.AddForce(Vector2.up * globals.updraftForce);
-        }
-
-        // If all the conditions are met for the player to jump (see Update())
-        if(isStartingJump)
-        {
-            // Apply upward force to make the player jump
-            if(isGrounded)
-            {
-                rb2d.AddForce(globals.jumpForce * Vector2.up);
-            }
-            else if(isGrabbing)
-            {
-                lastGrabbedObjectJumpedFrom = grabbedObject;
-                // Drop current item
-                DropObject();
-
-                // Do a wall jump
-                // Face away fom wall
-                if(grabbedObjectIsOnRight == isFacingRight)
-                {
-                    isFacingRight = !isFacingRight;
-                    transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
-                }
-                // Apply diagonal force to wall jump
-                if(grabbedObjectIsOnRight)
-                {   // Jump left
-                    rb2d.AddForce(globals.jumpForce * Vector2.left);
-                    rb2d.AddForce(globals.jumpForce * Vector2.up);
-                }
-                else
-                {   // jump right
-                    rb2d.AddForce(globals.jumpForce * Vector2.right);
-                    rb2d.AddForce(globals.jumpForce * Vector2.up);
-                }
-            }
-            else // Double jump uses doubleJumpForce instead of jumpForce
-            {
-                rb2d.AddForce(globals.doubleJumpForce * Vector2.up);
-            }
-
-            if (playSoundEffects) {
-                // Load sound effect at random
-                var sfxIndex = Random.Range(0, globals.jumpSoundEffects.Length);
-                globals.soundEffects.clip = globals.jumpSoundEffects[sfxIndex];
-                // Make sure looping is turned off
-                globals.soundEffects.loop = false;
-                // Play sound effect
-                globals.soundEffects.Play();
-            }
-
-            // And disable the new jump flag to prevent a second application of the upward force
-            isStartingJump = false;
-        }
-
-        // If all the conditions are met for the player to slam (see Update())
-        if(isStartingSlam)
-        {
-            // Interrupt momentum before slam
-            rb2d.velocity = Vector2.zero;
-            // Apply downward force to make the player slam down
-            rb2d.AddForce(globals.slamForce * Vector2.down);
-            // And disable the new slam flag to prevent a second application of the downward force
-            isStartingSlam = false;
-            // Turn on isSlamming flag to later check for landing from a slam
-            isSlamming = true;
-            // Disable moving while slamming
-            canMove = false;
-         
-            if (playSoundEffects) {
-                // Load sound effect for descent
-                globals.soundEffects.clip = globals.descendSoundEffect;
-                // Make sure loop is turned off
-                globals.soundEffects.loop = false;
-                // Play sound effect
-                globals.soundEffects.Play();
-            }
         }
 
         // If landing from a slam
@@ -424,6 +346,77 @@ public abstract class Character : MonoBehaviour {
         }
 
     }
+
+    public void Jump() {
+        // Apply upward force to make the player jump
+        if(isGrounded)
+        {
+            rb2d.AddForce(globals.jumpForce * Vector2.up, ForceMode2D.Impulse);
+        }
+        else if(isGrabbing)
+        {
+            lastGrabbedObjectJumpedFrom = grabbedObject;
+            // Drop current item
+            DropObject();
+
+            // Do a wall jump
+            // Face away fom wall
+            if(grabbedObjectIsOnRight == isFacingRight)
+            {
+                isFacingRight = !isFacingRight;
+                transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
+            }
+            // Apply diagonal force to wall jump
+            if(grabbedObjectIsOnRight)
+            {   // Jump left
+                rb2d.AddForce(globals.jumpForce * Vector2.left, ForceMode2D.Impulse);
+                rb2d.AddForce(globals.jumpForce * Vector2.up, ForceMode2D.Impulse);
+            }
+            else
+            {   // jump right
+                rb2d.AddForce(globals.jumpForce * Vector2.right, ForceMode2D.Impulse);
+                rb2d.AddForce(globals.jumpForce * Vector2.up, ForceMode2D.Impulse);
+            }
+        }
+        else // Double jump uses doubleJumpForce instead of jumpForce
+        {
+            rb2d.AddForce(globals.doubleJumpForce * Vector2.up, ForceMode2D.Impulse);
+        }
+
+        if (playSoundEffects) {
+            // Load sound effect at random
+            var sfxIndex = Random.Range(0, globals.jumpSoundEffects.Length);
+            globals.soundEffects.clip = globals.jumpSoundEffects[sfxIndex];
+            // Make sure looping is turned off
+            globals.soundEffects.loop = false;
+            // Play sound effect
+            globals.soundEffects.Play();
+        }
+    }
+
+    public void Slam() {
+        // Interrupt momentum before slam
+        rb2d.velocity = Vector2.zero;
+        // Apply downward force to make the player slam down
+        rb2d.AddForce(globals.slamForce * Vector2.down, ForceMode2D.Impulse);
+        // Turn on isSlamming flag to later check for landing from a slam
+        isSlamming = true;
+        // Disable moving while slamming
+        //canMove = false; // Disabled this to prevent a soft lock where you "land" on an edge while slamming
+        canSlam = false;
+        canGlide = false;
+        canJump = false;
+        canTurn = false;
+        
+        if (playSoundEffects) {
+            // Load sound effect for descent
+            globals.soundEffects.clip = globals.descendSoundEffect;
+            // Make sure loop is turned off
+            globals.soundEffects.loop = false;
+            // Play sound effect
+            globals.soundEffects.Play();
+        }
+    }
     
     protected void UpdateMovement () {
 
@@ -438,6 +431,13 @@ public abstract class Character : MonoBehaviour {
         isGrounded = isGrounded || Physics2D.OverlapArea(groundCheckTopLeft, groundCheckBottomRight, 1 << LayerMask.NameToLayer("Grabbable"));
         // Or a slammable object
         isGrounded = isGrounded || Physics2D.OverlapArea(groundCheckTopLeft, groundCheckBottomRight, 1 << LayerMask.NameToLayer("Slammable"));
+
+        // PAUSING
+        if(commands.btnDownEsc)
+        {
+            PauseOrUnpauseGame();
+        }
+
 
         // JUMPING
         
@@ -462,9 +462,7 @@ public abstract class Character : MonoBehaviour {
         // If the player can either jump or double jump and the jump button is pressed,
         if (commands.btnDownJump && !isGliding && ((isGrounded || isGrabbing || (canDoubleJump && hasDoubleJumpAbility))) && canJump)
         {
-            sprite.color = Color.white;
-            // Flag jumping as true for use in fixedupdate
-            isStartingJump = true;
+            ChangeColor(Color.white);
             // If jumping in the air while not wall grabbing, disable double jump to prevent triple jumps
             if(!isGrounded && !isGrabbing)
             {
@@ -472,6 +470,8 @@ public abstract class Character : MonoBehaviour {
                 rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
                 canDoubleJump = false;
             }
+
+            Jump();
         }
 
         
@@ -490,31 +490,30 @@ public abstract class Character : MonoBehaviour {
         // If player is trying to slam and can currently slam
         if(commands.btnDownSlam && canSlam && hasSlamAbilitiy)
         {
-            sprite.color = Color.red;
+            ChangeColor(globals.slamColor);
             // If player is on the ground
             if(isGrounded)
             {
                 // Jump then slam after slam delay
-                isStartingJump = true;
-                StartCoroutine(SlamCoroutine());
+                Jump();
+                StartCoroutine(WaitThenSlamCoroutine());
             }
             else
             {
                 // Otherwise start slam right now from in the air
-                isStartingSlam = true;
-                canSlam = false;
+                Slam();
             }
         } // If slamming has been completed
         else if(!commands.btnSlam && isGrounded)
         {
             // Change back to white
-            sprite.color = Color.white;
+            ChangeColor(Color.white);
         }
 
         // DASHING/GLIDING
 
         // If gliding is being initialized
-        if(commands.btnDownDash && hasGlideAbility && canGlide && !isStartingJump)
+        if(commands.btnDownDash && hasGlideAbility && canGlide)
         {
             // Drop all momentum to allow mid jump glides
             rb2d.velocity = Vector2.zero;
@@ -531,9 +530,9 @@ public abstract class Character : MonoBehaviour {
             }
         }
         // If player is holding the glide button while falling and has the glide ability
-        if (commands.btnDash && isGliding && !isGrabbing && hasGlideAbility && canGlide && !isStartingJump)
+        if (commands.btnDash && isGliding && !isGrabbing && hasGlideAbility && canGlide)
         {
-            sprite.color = Color.yellow;
+            ChangeColor(globals.glideColor);
             // Adjust gravity to create glide effect
             rb2d.gravityScale = globals.glideGravity;
             // Disable jump in the event that you were grounded when taking off
@@ -541,7 +540,7 @@ public abstract class Character : MonoBehaviour {
         }// If not gliding anymore
         else if(commands.btnUpDash)
         {
-            sprite.color = Color.white;
+            ChangeColor(Color.white);
             rb2d.gravityScale = globals.normalGravity;
             // Leave jump disabled until landing
             //canJump = true;
@@ -560,9 +559,9 @@ public abstract class Character : MonoBehaviour {
         // GRABBING
 
         // If player presses the grab button and has the grab ability
-        if (commands.btnDownGrab && hasGrabAbility)
+        if (commands.btnDownGrab && hasGrabAbility && canMove)
         {
-            sprite.color = Color.blue;
+            ChangeColor(globals.grabColor);
             GrabObject();
             if (grabbedObject != null)
             {
@@ -571,17 +570,17 @@ public abstract class Character : MonoBehaviour {
                 canDoubleJump = true;
             }
         }
-        else if (commands.btnGrab && hasGrabAbility)
+        else if (commands.btnGrab && hasGrabAbility && canMove)
         {
 			canGlide = true;
-            sprite.color = Color.blue;
+            ChangeColor(globals.grabColor);
             // Grab any wall contacted
             GrabObject();
         }// If no longer holding grab
         else if (commands.btnUpGrab)
         {
             // Change color back to white
-            sprite.color = Color.white;
+            ChangeColor(Color.white);
             DropObject();
         }
     }
@@ -644,6 +643,17 @@ public abstract class Character : MonoBehaviour {
         }
     }
 
+    void ChangeColor(Color newColor)
+    {
+        var graphics = transform.Find("Graphics");
+        if(graphics)
+        {
+            graphics.Find("BackSprite").GetComponent<SpriteRenderer>().color = newColor;
+            graphics.Find("CapeSprite").GetComponent<SpriteRenderer>().color = newColor;
+            var particlesModule = graphics.Find("Particles").GetComponent<ParticleSystem>().main;
+            particlesModule.startColor = newColor;
+        }
+    }
 
     public void PauseOrUnpauseGame()
     {
@@ -666,12 +676,10 @@ public abstract class Character : MonoBehaviour {
     }
 
     // Start slam after delay of slamDelay seconds
-    IEnumerator SlamCoroutine()
+    IEnumerator WaitThenSlamCoroutine()
     {
         yield return new WaitForSeconds(globals.slamDelay);
-
-        isStartingSlam = true;
-        canSlam = false;
+        Slam();
     }
 
 

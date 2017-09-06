@@ -53,7 +53,7 @@ public class CameraController : MonoBehaviour {
         if (newTarget != player.transform) {
             // Kill the player's input on the player character, and allow
             // for some extra time for this to finish.
-            player.GetComponent<PlayerController>().enabled = false;
+            player.GetComponent<PlayerCharacter>().enabled = false;
             player.GetComponent<NPCCharacter>().enabled = true;
             player.GetComponent<NPCCharacter>().Stop();
             transitionDuration += 1.0f;
@@ -87,7 +87,7 @@ public class CameraController : MonoBehaviour {
         // Return player control.
         var player = GameObject.Find("Player");
         if (target == player.transform) {   
-            player.GetComponent<PlayerController>().enabled = true;
+            player.GetComponent<PlayerCharacter>().enabled = true;
             player.GetComponent<NPCCharacter>().enabled = false;
         }
     }

@@ -7,6 +7,8 @@ public class Globals : MonoBehaviour {
     public float maxSpeed;
     [Tooltip("The maximum speed the player can move while gliding.")]
     public float maxGlideSpeed;
+    [Tooltip("The maximum vertical speed the player can move while floating in an updraft.")]
+    public float maxUpdraftSpeed;
     [Tooltip("The sideways force applied to the character when a or d is pressed.")]
     public float moveForce;
     [Tooltip("THe sideways force applied to the character when gliding and a or d is pressed.")]
